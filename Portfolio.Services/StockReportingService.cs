@@ -38,10 +38,9 @@ namespace Portfolio.Services
             }
             catch (Exception ex)
             {
-                Log.Error("Error generating P & L report as of {date}", reportingDate);
+                Log.Error(ex, "Error generating P & L report as of {date}", reportingDate);
+                throw;
             }
-
-            return null;
         }
     }
 }

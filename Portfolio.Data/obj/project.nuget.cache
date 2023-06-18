@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "EQWEAwzPCMMEmWFlTaDL3cGsHKrJZcmEB7jlnQaCI2o4Gjx2Hav255OuzpwVYDDxUH/6HFmbTxdkSlzuZhu10A==",
+  "dgSpecHash": "o7X9qORYL6awDWxPjN3QNp62174fTIOJoydlq2G2bJeNDHN9FyjxFv/CCNR5PSwVYzB1GrtpY9TtxtLMFLxvHg==",
   "success": true,
   "projectFilePath": "/Users/sabrym/Projects/Farallon/Portfolio/Portfolio.Data/Portfolio.Data.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/sabrym/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
   "logs": []
 }

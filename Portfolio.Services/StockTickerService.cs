@@ -22,10 +22,10 @@ namespace Portfolio.Services
             reportDate = reportDate.GetValueOrDefault(DateTime.Today);
             var stockInformation = await GetStockInformation(symbol);
             var stockInfoForReportingDate = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == reportDate);
-            var stockInfoForPrevious = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == reportDate);
+            var stockInfoForPrevious = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == reportDate.Value.AddDays(-1));
 
             if (stockInfoForReportingDate == null || stockInfoForPrevious == null)
-                throw new Exception();
+                throw new Exception($"Insufficient pricing information found for symbol: {symbol}");
 
             stockInfoForReportingDate.Close = stockInfoForPrevious.Price;
             return stockInfoForReportingDate;
@@ -40,7 +40,7 @@ namespace Portfolio.Services
                 if (!_memoryCache.TryGetValue(symbol, out StockInfo stockingfo))
                 {
                     using HttpClient client = _httpClientFactory.CreateClient();
-                    var response = await client.GetAsync($"{_configuration["Stock:Url"]}&symbol={symbol}&apikey={_configuration["Stock:ApiKey"]}");
+                    var response = await client.GetAsync($"{_configuration["Stock:Url"]}&symbol={symbol}&apikey={_configuration["Stock:ApiKey"]}&outputsize=full");
                     response.EnsureSuccessStatusCode();
 
                     var items = await response.Content.ReadAsStringAsync();

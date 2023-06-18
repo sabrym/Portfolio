@@ -18,12 +18,13 @@ namespace Portfolio.Services
 
         public async Task<List<Trade>> RetrieveItemsForPandL(DateTime yearEnding)
         {
+            int monthsInAYear = 12;
             var items = new List<ProcessingResult>();
-            for (DateTime i = yearEnding; i >= yearEnding.AddMonths(-12); i = yearEnding.AddMonths(-1))
+            for (DateTime i = yearEnding; i >= yearEnding.AddMonths(-monthsInAYear); i = i.AddMonths(-1))
             {
-                var foo = await RetrieveItems(i);
-                if(foo.ProcessedCount > 0)
-                    items.Add(foo);
+                var itemsForMonth = await RetrieveItems(i);
+                if(itemsForMonth.ProcessedCount > 0)
+                    items.Add(itemsForMonth);
             }
 
             return items.SelectMany(x => x.Trades).ToList();
@@ -38,8 +39,12 @@ namespace Portfolio.Services
             var failedItems = 0;
             try
             {
+                var fileName = string.Format(_configuration["Trades:LocationAndPrefix"], identifier);
+                if (!File.Exists(fileName))
+                    throw new Exception("The file does not exist");
+
                 // Loads into memory, so no disposal required
-                var doc = XDocument.Load(string.Format(_configuration["Trades:LocationAndPrefix"], identifier));
+                var doc = XDocument.Load(fileName);
                 
                 // tag name from config
                 var items = doc.Descendants(_configuration["Trades:DocumentTag"]);
@@ -59,9 +64,10 @@ namespace Portfolio.Services
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An error occurred reading data from: {identifier}", Guid.NewGuid());
+                Log.Error(ex, "An error occurred reading data from: {identifier}", identifier);
             }
 
+            // here we return a value even if there is no file, since we will need to perform this processing, for other existing files
             return new ProcessingResult(identifier, totalItems, tradeList.Count, failedItems, tradeList);
         }
     }
