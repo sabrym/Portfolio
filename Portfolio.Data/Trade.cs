@@ -6,5 +6,5 @@ namespace Portfolio.Data
 		Buy,
 		Sell
 	}
-	public record Trade(string Ticker, DateTime TradeDate, TradeAction Tradetype, int Quantity, decimal Price);
+	public record Trade(string Ticker, DateTime TradeDate, TradeAction Tradetype, int Quantity, decimal Price, decimal Cost);
 }
