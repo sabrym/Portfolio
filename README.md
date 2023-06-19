@@ -1,7 +1,3 @@
-# Coding Exercise
-
-Please refer to the provided document for the code challenge requirements.
-
 ## Framework & languages
 This project uses
 * .Net6.0 / C#
