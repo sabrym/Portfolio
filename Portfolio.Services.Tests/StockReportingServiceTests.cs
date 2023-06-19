@@ -47,7 +47,7 @@ public class StockReportingServiceTests
     {
         // Arrange
         _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(DataGenerator.GenerateTrades);
-        _stockTickerServiceMock.Setup(x => x.GetStockInformationByDate(It.Is<string>(x => x == DataGenerator.GenerateTrades.ElementAt(0).Ticker), It.Is<DateTime>(x => x == DataGenerator.GenerateTrades.ElementAt(0).TradeDate))).ReturnsAsync(DataGenerator.StockInfoMocker);
+        _stockTickerServiceMock.Setup(x => x.GetStockInformationByDate(It.Is<string>(x => x == DataGenerator.GenerateTrades.ElementAt(0).Ticker), It.Is<DateTime>(x => x == DataGenerator.GenerateTrades.ElementAt(0).TradeDate))).ReturnsAsync(DataGenerator.DailyStockInfoMocker);
         var stockReportingService = new StockReportingService(_stockTickerServiceMock.Object, _tradeReaderServiceMock.Object);
 
         // Act

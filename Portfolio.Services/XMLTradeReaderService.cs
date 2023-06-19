@@ -20,12 +20,17 @@ namespace Portfolio.Services
         public XMLTradeReaderService(TradesConfig configuration, IFileWrapper fileWrapper) => (_configuration, _fileWrapper) = (configuration, fileWrapper);
 
         /// <summary>
-        /// 
+        /// Iterate through a calendar year and process the relevant xml files
         /// </summary>
         /// <param name="yearEnding"></param>
-        /// <returns></returns>
+        /// <returns>
+        /// A list of trades that happened during the course of the reporting period
+        /// </returns>
         public List<Trade> RetrieveItemsForPandL(DateTime yearEnding)
         {
+            if (_fileWrapper.DirectoryIsEmpty(_configuration.Directory))
+                throw new Utilities.ApplicationException("The directory is empty");
+
             int monthsInAYear = 12;
             var items = new List<Trade>();
             for (DateTime i = yearEnding; i >= yearEnding.AddMonths(-monthsInAYear); i = i.AddMonths(-1))
@@ -47,13 +52,15 @@ namespace Portfolio.Services
         /// </returns>
         public List<Trade> RetrieveItems(DateTime month)
         {
-            var identifier = month.ToString("MM-yyyy");
+            var identifier = month.ToString(_configuration.MonthYearDelimiter);
+
             // trades in month
             var tradeList = new List<Trade>();
 
             try
             {
-                var fileName = string.Format(_configuration.LocationAndPrefix, identifier);
+                var fileName = string.Format($"{_configuration.Directory}{_configuration.FileName}", identifier);
+
                 if (!_fileWrapper.FileExists(fileName))
                     throw new Utilities.ApplicationException($"The file {fileName} does not exist");
 
@@ -81,7 +88,6 @@ namespace Portfolio.Services
                 Log.Error(ex, "An error occurred reading data from: {identifier}", identifier);
             }
 
-            // here we return a value even if there is no file, since we will need to perform this processing, for other existing files
             return tradeList;
         }
     }

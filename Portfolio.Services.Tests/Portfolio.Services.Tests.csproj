@@ -26,4 +26,10 @@
     <ProjectReference Include="..\Portfolio.Services\Portfolio.Services.csproj" />
     <ProjectReference Include="..\Portfolio.Utilities\Portfolio.Utilities.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="TestFiles\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TestFiles\" />
+  </ItemGroup>
 </Project>

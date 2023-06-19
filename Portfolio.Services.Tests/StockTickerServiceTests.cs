@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Specialized;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Moq.Protected;
@@ -49,7 +50,31 @@ namespace Portfolio.Services.Tests
             // assert
             Assert.NotNull(result);
         }
-        //, new DateTime(2023, 06, 16)
+
+        [Fact]
+        public async Task GetStockInformationWithValidSymbolWithCache_ReturnsSuccessfulResult()
+        {
+            // arrange
+            var payload = "{\n    \"Meta Data\": {\n        \"1. Information\": \"Daily Time Series with Splits and Dividend Events\",\n        \"2. Symbol\": \"msft\",\n        \"3. Last Refreshed\": \"2023-06-16\",\n        \"4. Output Size\": \"Full size\",\n        \"5. Time Zone\": \"US/Eastern\"\n    },\n    \"Time Series (Daily)\": {\n        \"2023-06-16\": {\n            \"1. open\": \"351.32\",\n            \"2. high\": \"351.47\",\n            \"3. low\": \"341.95\",\n            \"4. close\": \"342.33\",\n            \"5. adjusted close\": \"342.33\",\n            \"6. volume\": \"46551985\",\n            \"7. dividend amount\": \"0.0000\",\n            \"8. split coefficient\": \"1.0\"\n        }\n    }\n}";
+            var symbol = "MSFT";
+
+
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            memoryCache.Set(symbol, DataGenerator.StockInfoMocker);
+
+            _httpClientFactory = BuildHttpClientFactoryMock(payload);
+
+            var stockTickerService = new StockTickerService(_httpClientFactory.Object, new StockConfig { ApiKey = "q23", Url = "http://www.mockapi.com/" }, memoryCache);
+
+            // act
+            var result = await stockTickerService.GetStockInformation(symbol);
+
+            // assert
+            Assert.NotNull(result);
+            Assert.Equal(DataGenerator.StockInfoMocker.StockMetaData, result.StockMetaData);
+        }
+
+        //ToDo: add for the holiday logic, new DateTime(2023, 06, 16)
 
         private static Mock<IHttpClientFactory> BuildHttpClientFactoryMock(string response)
 		{
