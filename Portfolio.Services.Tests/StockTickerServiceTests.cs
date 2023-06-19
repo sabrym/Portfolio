@@ -20,7 +20,7 @@ namespace Portfolio.Services.Tests
 		}
 
         [Fact]
-        public void GetStockInformation_WithInvalidSymbol_ThrowsException()
+        public async Task GetStockInformation_WithInvalidSymbol_ThrowsException()
         {
             // arrange
             var symbol = string.Empty;
@@ -28,7 +28,7 @@ namespace Portfolio.Services.Tests
 
             // act           
             // assert
-            Assert.ThrowsAsync<ApplicationException>(() => stockTickerService.GetStockInformationByDate(symbol, DateTime.Today));
+            await Assert.ThrowsAsync<Utilities.ApplicationException>(() => stockTickerService.GetStockInformation(symbol));
         }
 
         [Fact]
@@ -90,6 +90,22 @@ namespace Portfolio.Services.Tests
 
             // assert
             Assert.Equal(reportDate, result.Date);
+        }
+
+        [Fact]
+        public async Task GetStockInformationByDate_WithValidSymbolAndReportDateWithMissingTradeData_ThrowsException()
+        {
+            // arrange
+            var payload = "{\n    \"Meta Data\": {\n        \"1. Information\": \"Daily Time Series with Splits and Dividend Events\",\n        \"2. Symbol\": \"msft\",\n        \"3. Last Refreshed\": \"2023-06-16\",\n        \"4. Output Size\": \"Full size\",\n        \"5. Time Zone\": \"US/Eastern\"\n    },\n    \"Time Series (Daily)\": {\n        \"2023-06-16\": {\n            \"1. open\": \"351.32\",\n            \"2. high\": \"351.47\",\n            \"3. low\": \"341.95\",\n            \"4. close\": \"342.33\",\n            \"5. adjusted close\": \"342.33\",\n            \"6. volume\": \"46551985\",\n            \"7. dividend amount\": \"0.0000\",\n            \"8. split coefficient\": \"1.0\"\n        }\n    }\n}";
+            var symbol = "MSFT";
+            var reportDate = new DateTime(2023, 06, 16);
+            _httpClientFactory = BuildHttpClientFactoryMock(payload);
+
+            var stockTickerService = new StockTickerService(_httpClientFactory.Object, new StockConfig { ApiKey = "q23", Url = "http://www.mockapi.com/" }, new MemoryCache(new MemoryCacheOptions()));
+
+            // act
+            // assert
+            await Assert.ThrowsAsync<Utilities.ApplicationException>(() => stockTickerService.GetStockInformationByDate(symbol, DateTime.Today));
         }
 
         private static Mock<IHttpClientFactory> BuildHttpClientFactoryMock(string response)
