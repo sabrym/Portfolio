@@ -8,7 +8,7 @@ This project uses
 
 ## Available scripts
 - `dotnet build` - To build the relevant dependencies
-- `dotnet run` - Execute in the server folder, to start the server 
+- `dotnet run` - Execute in the server folder (Portfolio.Api), to start the server 
 - `dotnet test` - To execute the unit tests
 
 ## Implementation Summary

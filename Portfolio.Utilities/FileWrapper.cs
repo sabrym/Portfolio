@@ -5,7 +5,7 @@ namespace Portfolio.Utilities
     {
         public bool DirectoryIsEmpty(string path)
         {
-            return Directory.Exists(path) && Directory.GetFiles(path).Any();
+            return !Directory.Exists(path) || !Directory.GetFiles(path).Any();
         }
 
         public bool FileExists(string fileLocation)
