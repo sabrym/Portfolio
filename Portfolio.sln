@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portfolio.Data", "Portfolio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portfolio.Utilities", "Portfolio.Utilities\Portfolio.Utilities.csproj", "{8D0026FA-E7DC-4617-8255-22FD03606078}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portfolio.Services.Tests", "Portfolio.Services.Tests\Portfolio.Services.Tests.csproj", "{A98E4FD4-8406-4384-AA35-740A8F68EE56}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{8D0026FA-E7DC-4617-8255-22FD03606078}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D0026FA-E7DC-4617-8255-22FD03606078}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D0026FA-E7DC-4617-8255-22FD03606078}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A98E4FD4-8406-4384-AA35-740A8F68EE56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A98E4FD4-8406-4384-AA35-740A8F68EE56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A98E4FD4-8406-4384-AA35-740A8F68EE56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A98E4FD4-8406-4384-AA35-740A8F68EE56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

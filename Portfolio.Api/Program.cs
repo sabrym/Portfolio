@@ -3,6 +3,7 @@ using Portfolio.Api.Middleware;
 using Portfolio.Data.Configs;
 using Portfolio.Services;
 using Portfolio.Services.Interfaces;
+using Portfolio.Utilities;
 using Serilog;
 
 namespace Portfolio.Api;
@@ -48,7 +49,9 @@ public class Program
             builder.Services.AddSingleton(resolver =>
                    resolver.GetRequiredService<IOptions<StockConfig>>().Value);
             #endregion
-
+            #region Utilities
+            builder.Services.AddSingleton<IFileWrapper, FileWrapper>();
+            #endregion
             #region Add Business Logic
             builder.Services.AddSingleton<IStockTickerService, StockTickerService>();
             builder.Services.AddSingleton<ITradeReaderService, XMLTradeReaderService>();

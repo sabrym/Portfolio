@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Portfolio.Data;
 using Portfolio.Data.Configs;
 using Portfolio.Services.Interfaces;
+using Portfolio.Utilities;
 using Serilog;
 
 namespace Portfolio.Services
@@ -14,21 +15,22 @@ namespace Portfolio.Services
 	public class XMLTradeReaderService: ITradeReaderService
 	{
         private readonly TradesConfig _configuration;
+        private readonly IFileWrapper _fileWrapper;
 
-        public XMLTradeReaderService(TradesConfig configuration) => _configuration = configuration;
+        public XMLTradeReaderService(TradesConfig configuration, IFileWrapper fileWrapper) => (_configuration, _fileWrapper) = (configuration, fileWrapper);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="yearEnding"></param>
         /// <returns></returns>
-        public async Task<List<Trade>> RetrieveItemsForPandL(DateTime yearEnding)
+        public List<Trade> RetrieveItemsForPandL(DateTime yearEnding)
         {
             int monthsInAYear = 12;
             var items = new List<Trade>();
             for (DateTime i = yearEnding; i >= yearEnding.AddMonths(-monthsInAYear); i = i.AddMonths(-1))
             {
-                var itemsForMonth = await RetrieveItems(i);
+                var itemsForMonth = RetrieveItems(i);
                 if(itemsForMonth.Any())
                     items.AddRange(itemsForMonth);
             }
@@ -43,7 +45,7 @@ namespace Portfolio.Services
         /// <returns>
         /// A processing result, total items processed and the payload
         /// </returns>
-        public async Task<List<Trade>> RetrieveItems(DateTime month)
+        public List<Trade> RetrieveItems(DateTime month)
         {
             var identifier = month.ToString("MM-yyyy");
             // trades in month
@@ -52,8 +54,8 @@ namespace Portfolio.Services
             try
             {
                 var fileName = string.Format(_configuration.LocationAndPrefix, identifier);
-                if (!File.Exists(fileName))
-                    throw new ApplicationException($"The file {fileName} does not exist");
+                if (!_fileWrapper.FileExists(fileName))
+                    throw new Utilities.ApplicationException($"The file {fileName} does not exist");
 
                 // Loads into memory, so no disposal required
                 var doc = XDocument.Load(fileName);

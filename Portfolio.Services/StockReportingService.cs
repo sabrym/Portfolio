@@ -17,10 +17,10 @@ namespace Portfolio.Services
             try
             {
                 Log.Information("Generating P & L report as of {date}", reportingDate);
-                var processingResult = await _tradeReaderService.RetrieveItemsForPandL(reportingDate);
+                var processingResult = _tradeReaderService.RetrieveItemsForPandL(reportingDate);
 
                 if (!processingResult.Any())
-                    throw new Exception($"No trade files found for reporting period: {reportingDate}");
+                    throw new ApplicationException($"No trade files found for reporting period: {reportingDate}");
 
                 var list = new List<StockReportItem>();
                 foreach (var item in processingResult.GroupBy(x => x.Ticker))

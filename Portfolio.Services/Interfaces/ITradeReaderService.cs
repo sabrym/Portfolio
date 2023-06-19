@@ -5,8 +5,8 @@ namespace Portfolio.Services.Interfaces
 {
 	public interface ITradeReaderService
 	{
-		Task<List<Trade>> RetrieveItems(DateTime reportingDate);
-        Task<List<Trade>> RetrieveItemsForPandL(DateTime yearEnding);
+        List<Trade> RetrieveItems(DateTime reportingDate);
+        List<Trade> RetrieveItemsForPandL(DateTime yearEnding);
     }
 }
 
