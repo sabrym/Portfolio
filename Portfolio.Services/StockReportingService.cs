@@ -19,20 +19,23 @@ namespace Portfolio.Services
                 Log.Information("Generating P & L report as of {date}", reportingDate);
                 var processingResult = await _tradeReaderService.RetrieveItemsForPandL(reportingDate);
 
-                if (processingResult == null)
-                    throw new Exception("Unable to process input");
+                if (!processingResult.Any())
+                    throw new Exception($"No trade files found for reporting period: {reportingDate}");
 
                 var list = new List<StockReportItem>();
                 foreach (var item in processingResult.GroupBy(x => x.Ticker))
                 {
                     var trades = item.ToList();
                     var stock = await _stockTickerService.GetStockInformationByDate(item.Key, reportingDate);
-                    var stockItem = new StockReportItem(item.Key, reportingDate, trades.Sum(x => x.Cost), trades.Sum(x => x.Quantity), stock.Price, stock.Close);
-                    list.Add(stockItem);
+                    var totalCost = trades.Where(x => x.Tradetype == TradeAction.Buy).Sum(x => x.Cost);
+                    var totalQuantity = trades.Where(x => x.Tradetype == TradeAction.Buy).Sum(x => x.Quantity);
+
+                    list.Add(new StockReportItem(item.Key, reportingDate, totalCost, totalQuantity, stock.Price, stock.Close));
                 }
 
                 // generate the report using closed xml
-                var generatedReport = ExcelReportWriter.GenerateReport(list, "default", "das");
+                var generatedReport = ExcelReportWriter.GenerateReport(list, "P&L");
+
                 Log.Information("Generated P & L report as of {date}", reportingDate);
                 return generatedReport;
             }

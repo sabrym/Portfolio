@@ -3,7 +3,9 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Portfolio.Data;
+using Portfolio.Data.Configs;
 using Portfolio.Services.Interfaces;
+using Portfolio.Utilities;
 using Serilog;
 
 namespace Portfolio.Services
@@ -11,21 +13,23 @@ namespace Portfolio.Services
 	public class StockTickerService: IStockTickerService
 	{
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _configuration;
+        private readonly StockConfig _configuration;
         private readonly IMemoryCache _memoryCache;
 
-        public StockTickerService(IHttpClientFactory httpClientFactory, IConfiguration configuration, IMemoryCache memoryCache) => (_httpClientFactory, _configuration, _memoryCache) = (httpClientFactory, configuration, memoryCache);
+        public StockTickerService(IHttpClientFactory httpClientFactory, StockConfig configuration, IMemoryCache memoryCache) => (_httpClientFactory, _configuration, _memoryCache) = (httpClientFactory, configuration, memoryCache);
 
         public async Task<DailyStock> GetStockInformationByDate(string symbol, DateTime? reportDate)
         {
             // check if there is an existing reporting date, else take the current date
             reportDate = reportDate.GetValueOrDefault(DateTime.Today);
+
             var stockInformation = await GetStockInformation(symbol);
-            var stockInfoForReportingDate = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == reportDate);
-            var stockInfoForPrevious = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == reportDate.Value.AddDays(-1));
+            var (actualDate, previousDate) = DateTimeUtilities.GetReportingDate(reportDate.Value);
+            var stockInfoForReportingDate = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == actualDate);
+            var stockInfoForPrevious = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == previousDate);
 
             if (stockInfoForReportingDate == null || stockInfoForPrevious == null)
-                throw new Exception($"Insufficient pricing information found for symbol: {symbol}");
+                throw new Utilities.ApplicationException($"Insufficient pricing information found for symbol: {symbol}");
 
             stockInfoForReportingDate.Close = stockInfoForPrevious.Price;
             return stockInfoForReportingDate;
@@ -40,7 +44,7 @@ namespace Portfolio.Services
                 if (!_memoryCache.TryGetValue(symbol, out StockInfo stockingfo))
                 {
                     using HttpClient client = _httpClientFactory.CreateClient();
-                    var response = await client.GetAsync($"{_configuration["Stock:Url"]}&symbol={symbol}&apikey={_configuration["Stock:ApiKey"]}&outputsize=full");
+                    var response = await client.GetAsync($"{_configuration.Url}&symbol={symbol}&apikey={_configuration.ApiKey}&outputsize=full");
                     response.EnsureSuccessStatusCode();
 
                     var items = await response.Content.ReadAsStringAsync();

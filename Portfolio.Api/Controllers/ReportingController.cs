@@ -21,8 +21,8 @@ public class ReportingController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(DateTime reportingDate)
     {
-        var generatedReport = await _reportingService.GenerateReportWithItemRetrieval(new DateTime(2018, 04, 10));
-        return File(generatedReport, "application/vnd.ms-excel", "Report.xlsx");
+        var generatedReport = await _reportingService.GenerateReportWithItemRetrieval(reportingDate);
+        return File(generatedReport, "application/vnd.ms-excel", "report.xlsx");
     }
 }
 

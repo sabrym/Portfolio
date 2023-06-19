@@ -1,4 +1,7 @@
-﻿using Portfolio.Services;
+﻿using Microsoft.Extensions.Options;
+using Portfolio.Api.Middleware;
+using Portfolio.Data.Configs;
+using Portfolio.Services;
 using Portfolio.Services.Interfaces;
 using Serilog;
 
@@ -28,6 +31,24 @@ public class Program
             builder.Services.AddHttpClient();
             #endregion
 
+            #region Bind Configurations
+            builder.Services.AddOptions<TradesConfig>()
+                .BindConfiguration(TradesConfig.Trades)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            builder.Services.AddOptions<StockConfig>()
+                .BindConfiguration(StockConfig.Stock)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            builder.Services.AddSingleton(resolver =>
+                    resolver.GetRequiredService<IOptions<TradesConfig>>().Value);
+
+            builder.Services.AddSingleton(resolver =>
+                   resolver.GetRequiredService<IOptions<StockConfig>>().Value);
+            #endregion
+
             #region Add Business Logic
             builder.Services.AddSingleton<IStockTickerService, StockTickerService>();
             builder.Services.AddSingleton<ITradeReaderService, XMLTradeReaderService>();
@@ -37,7 +58,7 @@ public class Program
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            //app.UseSerilogRequestLogging();
+            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseHttpsRedirection();
 
@@ -60,7 +81,6 @@ public class Program
         catch (Exception ex)
         {
             Log.Fatal(ex, "Unhandled exception");
-
         }
     }
 }

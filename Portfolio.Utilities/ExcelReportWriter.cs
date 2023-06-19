@@ -15,7 +15,7 @@ namespace Portfolio.Services
             return Task.CompletedTask;
         }
 
-        public static byte[] GenerateReport<T>(List<T> items, string reportName, string worksheetName)
+        public static byte[] GenerateReport<T>(List<T> items, string worksheetName)
         {
             using var workbook = new XLWorkbook();
             workbook.AddWorksheet(items.ToDataTable<T>(worksheetName)).ColumnsUsed().AdjustToContents();

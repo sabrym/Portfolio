@@ -27,11 +27,11 @@ namespace Portfolio.Data
 		public StockMetaData StockMetaData { get; set; }
 
         [JsonProperty("Time Series (Daily)")]
-        [JsonConverter(typeof(ShippingMethodConverter))]
+        [JsonConverter(typeof(StockConverter))]
         public List<DailyStock> DailyStocks { get; set; }
     }
 
-    public class ShippingMethodConverter : JsonConverter
+    public class StockConverter : JsonConverter
     {
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -51,20 +51,20 @@ namespace Portfolio.Data
             }
             else
             {
-                JObject obj = JObject.Load(reader);
+                JObject stockPrices = JObject.Load(reader);
 
-                var list = new List<DailyStock>();
-                foreach (var x in obj)
+                var dailyStocks = new List<DailyStock>();
+                foreach (var x in stockPrices)
                 {
-                    string name = x.Key;
+                    string dateKey = x.Key;
                     JToken value = x.Value;
 
-                    var ob = value.ToObject<DailyStock>();
-                    ob.Date = DateTime.Parse(name);
-                    list.Add(ob);
+                    var parsedValue = value.ToObject<DailyStock>();
+                    parsedValue.Date = DateTime.Parse(dateKey);
+                    dailyStocks.Add(parsedValue);
                 }
 
-                return list;
+                return dailyStocks;
             }
         }
 
