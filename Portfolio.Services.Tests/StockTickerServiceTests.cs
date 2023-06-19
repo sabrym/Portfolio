@@ -20,7 +20,7 @@ namespace Portfolio.Services.Tests
 		}
 
         [Fact]
-        public void GetStockInformationWithInvalidSymbol_ThrowsException()
+        public void GetStockInformation_WithInvalidSymbol_ThrowsException()
         {
             // arrange
             var symbol = string.Empty;
@@ -32,7 +32,7 @@ namespace Portfolio.Services.Tests
         }
 
         [Fact]
-        public async Task GetStockInformationWithValidSymbolWithCacheEmpty_ReturnsSuccessfulResult()
+        public async Task GetStockInformation_WithValidSymbolWithCacheEmpty_ReturnsSuccessfulResult()
         {
             // arrange
             var payload = "{\n    \"Meta Data\": {\n        \"1. Information\": \"Daily Time Series with Splits and Dividend Events\",\n        \"2. Symbol\": \"msft\",\n        \"3. Last Refreshed\": \"2023-06-16\",\n        \"4. Output Size\": \"Full size\",\n        \"5. Time Zone\": \"US/Eastern\"\n    },\n    \"Time Series (Daily)\": {\n        \"2023-06-16\": {\n            \"1. open\": \"351.32\",\n            \"2. high\": \"351.47\",\n            \"3. low\": \"341.95\",\n            \"4. close\": \"342.33\",\n            \"5. adjusted close\": \"342.33\",\n            \"6. volume\": \"46551985\",\n            \"7. dividend amount\": \"0.0000\",\n            \"8. split coefficient\": \"1.0\"\n        }\n    }\n}";
@@ -52,7 +52,7 @@ namespace Portfolio.Services.Tests
         }
 
         [Fact]
-        public async Task GetStockInformationWithValidSymbolWithCache_ReturnsSuccessfulResult()
+        public async Task GetStockInformation_WithValidSymbolWithCache_ReturnsSuccessfulResult()
         {
             // arrange
             var payload = "{\n    \"Meta Data\": {\n        \"1. Information\": \"Daily Time Series with Splits and Dividend Events\",\n        \"2. Symbol\": \"msft\",\n        \"3. Last Refreshed\": \"2023-06-16\",\n        \"4. Output Size\": \"Full size\",\n        \"5. Time Zone\": \"US/Eastern\"\n    },\n    \"Time Series (Daily)\": {\n        \"2023-06-16\": {\n            \"1. open\": \"351.32\",\n            \"2. high\": \"351.47\",\n            \"3. low\": \"341.95\",\n            \"4. close\": \"342.33\",\n            \"5. adjusted close\": \"342.33\",\n            \"6. volume\": \"46551985\",\n            \"7. dividend amount\": \"0.0000\",\n            \"8. split coefficient\": \"1.0\"\n        }\n    }\n}";
@@ -74,7 +74,23 @@ namespace Portfolio.Services.Tests
             Assert.Equal(DataGenerator.StockInfoMocker.StockMetaData, result.StockMetaData);
         }
 
-        //ToDo: add for the holiday logic, new DateTime(2023, 06, 16)
+        [Fact]
+        public async Task GetStockInformationByDate_WithValidSymbolAndReportDate_ReturnsValidResult()
+        {
+            // arrange
+            var payload = "{\n    \"Meta Data\": {\n        \"1. Information\": \"Daily Time Series with Splits and Dividend Events\",\n        \"2. Symbol\": \"msft\",\n        \"3. Last Refreshed\": \"2023-06-16\",\n        \"4. Output Size\": \"Full size\",\n        \"5. Time Zone\": \"US/Eastern\"\n    },\n    \"Time Series (Daily)\": {\n        \"2023-06-16\": {\n            \"1. open\": \"351.32\",\n            \"2. high\": \"351.47\",\n            \"3. low\": \"341.95\",\n            \"4. close\": \"342.33\",\n            \"5. adjusted close\": \"342.33\",\n            \"6. volume\": \"46551985\",\n            \"7. dividend amount\": \"0.0000\",\n            \"8. split coefficient\": \"1.0\"\n        },\n        \"2023-06-15\": {\n            \"1. open\": \"351.32\",\n            \"2. high\": \"351.47\",\n            \"3. low\": \"341.95\",\n            \"4. close\": \"342.33\",\n            \"5. adjusted close\": \"342.33\",\n            \"6. volume\": \"46551985\",\n            \"7. dividend amount\": \"0.0000\",\n            \"8. split coefficient\": \"1.0\"\n        }\n    }\n}";
+            var symbol = "MSFT";
+            var reportDate = new DateTime(2023, 06, 16);
+            _httpClientFactory = BuildHttpClientFactoryMock(payload);
+
+            var stockTickerService = new StockTickerService(_httpClientFactory.Object, new StockConfig { ApiKey = "q23", Url = "http://www.mockapi.com/" }, new MemoryCache(new MemoryCacheOptions()));
+
+            // act
+            var result = await stockTickerService.GetStockInformationByDate(symbol, reportDate);
+
+            // assert
+            Assert.Equal(reportDate, result.Date);
+        }
 
         private static Mock<IHttpClientFactory> BuildHttpClientFactoryMock(string response)
 		{

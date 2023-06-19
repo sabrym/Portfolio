@@ -16,7 +16,7 @@ public class StockReportingServiceTests
     }
 
     [Fact]
-    public void GenerateReportWithItemRetrieval_ThrowsException_WhenNoTradesExist()
+    public void GenerateReport_WithItemRetrieval_ThrowsException_WhenNoTradesExist()
     {
         // Arrange
         _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(new List<Trade>());
@@ -29,7 +29,7 @@ public class StockReportingServiceTests
     }
 
     [Fact]
-    public void GenerateReportWithItemRetrieval_ThrowsException_WhenStockInformationDoesNotExist()
+    public void GenerateReport_WithItemRetrieval_ThrowsException_WhenStockInformationDoesNotExist()
     {
         // Arrange
         _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(DataGenerator.GenerateTrades);
@@ -43,7 +43,7 @@ public class StockReportingServiceTests
     }
 
     [Fact]
-    public void GenerateReportWithItemRetrieval_ReturnsValidReport()
+    public void GenerateReport_WithItemRetrieval_ReturnsValidReport()
     {
         // Arrange
         _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(DataGenerator.GenerateTrades);

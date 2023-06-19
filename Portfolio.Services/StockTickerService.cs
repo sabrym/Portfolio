@@ -18,13 +18,10 @@ namespace Portfolio.Services
 
         public StockTickerService(IHttpClientFactory httpClientFactory, StockConfig configuration, IMemoryCache memoryCache) => (_httpClientFactory, _configuration, _memoryCache) = (httpClientFactory, configuration, memoryCache);
 
-        public async Task<DailyStock> GetStockInformationByDate(string symbol, DateTime? reportDate)
+        public async Task<DailyStock> GetStockInformationByDate(string symbol, DateTime reportDate)
         {
-            // check if there is an existing reporting date, else take the current date
-            reportDate = reportDate.GetValueOrDefault(DateTime.Today);
-
             var stockInformation = await GetStockInformation(symbol);
-            var (actualDate, previousDate) = DateTimeUtilities.GetReportingDate(reportDate.Value);
+            var (actualDate, previousDate) = DateTimeUtilities.GetReportingDate(reportDate);
             var stockInfoForReportingDate = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == actualDate);
             var stockInfoForPrevious = stockInformation.DailyStocks.FirstOrDefault(x => x.Date == previousDate);
 
@@ -67,29 +64,6 @@ namespace Portfolio.Services
             {
                 Log.Error(ex, "Error retrieving Stock Information for symbol: {symbol}", symbol);
                 throw;
-            }
-        }
-
-        public DailyStock? StockInfoMocker(string symbol)
-        {
-            switch (symbol)
-            {
-                case "MSFT":
-                    return new DailyStock
-                    {
-                        Price = 92.64m,
-                        Close = 90.77m,
-                        Date = new DateTime(2018, 04, 10)
-                    };
-                case "GOOG":
-                    return new DailyStock
-                    {
-                        Price = 1024.61m,
-                        Close = 1015.45m,
-                        Date = new DateTime(2018, 04, 10)
-                    };
-                default:
-                    return null;
             }
         }
     }
