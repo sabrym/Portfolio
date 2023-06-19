@@ -14,6 +14,15 @@ Then for each unique symbol imported, we will use the https://www.alphavantage.c
 
 The generated report is then served as the response to the GET endpoint.
 
+### Additional Points to Note
+- Configurations, like the XML storage location can be found in appsettings.json file in Portfolio.Api project
+  - The current location is at root level of the repository under the folder Trades
+- Unit tests have been written to cover the business logic services
+- The following has been used in the application
+  - Serilog
+  - Swagger
+  - Appsettings configuration binding and validation 
+
 ## Future improvements
 - Background Service to get the daily trade data and store, possiblity a documentDB
 - Additional background service that imports file to storage. e.g. Daily
