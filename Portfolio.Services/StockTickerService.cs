@@ -41,6 +41,9 @@ namespace Portfolio.Services
             {
                 Log.Information("Retrieving Stock Information for symbol: {symbol}", symbol);
 
+                if (string.IsNullOrWhiteSpace(symbol))
+                    throw new Utilities.ApplicationException("The symbol is invalid");
+
                 if (!_memoryCache.TryGetValue(symbol, out StockInfo stockingfo))
                 {
                     using HttpClient client = _httpClientFactory.CreateClient();

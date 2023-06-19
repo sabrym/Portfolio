@@ -3,6 +3,7 @@ using System;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Moq.Protected;
+using Portfolio.Data.Configs;
 
 namespace Portfolio.Services.Tests
 {
@@ -13,15 +14,50 @@ namespace Portfolio.Services.Tests
 
 		public StockTickerServiceTests()
 		{
-
+            _httpClientFactory = new Mock<IHttpClientFactory>();
+            _memoryCacheMock = new Mock<IMemoryCache>();
 		}
 
-		private static Mock<IHttpClientFactory> BuildHttpClientForFactoryMock<T>(T response)
+        [Fact]
+        public void GetStockInformationWithInvalidSymbol_ThrowsException()
+        {
+            // arrange
+            var symbol = string.Empty;
+            var stockTickerService = new StockTickerService(_httpClientFactory.Object, new StockConfig { ApiKey = "q23", Url = "http://www.google.com" }, _memoryCacheMock.Object);
+
+            // act           
+            // assert
+            Assert.ThrowsAsync<ApplicationException>(() => stockTickerService.GetStockInformationByDate(symbol, DateTime.Today));
+        }
+
+        [Fact]
+        public async Task GetStockInformationWithValidSymbolWithCacheEmpty_ReturnsSuccessfulResult()
+        {
+            // arrange
+            var payload = "{\n    \"Meta Data\": {\n        \"1. Information\": \"Daily Time Series with Splits and Dividend Events\",\n        \"2. Symbol\": \"msft\",\n        \"3. Last Refreshed\": \"2023-06-16\",\n        \"4. Output Size\": \"Full size\",\n        \"5. Time Zone\": \"US/Eastern\"\n    },\n    \"Time Series (Daily)\": {\n        \"2023-06-16\": {\n            \"1. open\": \"351.32\",\n            \"2. high\": \"351.47\",\n            \"3. low\": \"341.95\",\n            \"4. close\": \"342.33\",\n            \"5. adjusted close\": \"342.33\",\n            \"6. volume\": \"46551985\",\n            \"7. dividend amount\": \"0.0000\",\n            \"8. split coefficient\": \"1.0\"\n        }\n    }\n}";
+            var symbol = "MSFT";
+
+            var entryMock = new Mock<ICacheEntry>();
+            _memoryCacheMock.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(entryMock.Object);
+            _httpClientFactory = BuildHttpClientFactoryMock(payload);
+
+            var stockTickerService = new StockTickerService(_httpClientFactory.Object, new StockConfig { ApiKey = "q23", Url = "http://www.mockapi.com/" }, _memoryCacheMock.Object);
+
+            // act
+            var result = await stockTickerService.GetStockInformation(symbol);
+
+            // assert
+            Assert.NotNull(result);
+        }
+        //, new DateTime(2023, 06, 16)
+
+        private static Mock<IHttpClientFactory> BuildHttpClientFactoryMock(string response)
 		{
 			var httpclientFactoryMock = new Mock<IHttpClientFactory>();
-            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            var handlerMock = new Mock<HttpMessageHandler>();
 
             HttpResponseMessage result = new HttpResponseMessage();
+            result.Content = new StringContent(response);
             // add response to result
             handlerMock
                 .Protected()
@@ -30,8 +66,7 @@ namespace Portfolio.Services.Tests
                     ItExpr.IsAny<HttpRequestMessage>(),
                     ItExpr.IsAny<CancellationToken>()
                 )
-                .ReturnsAsync(result)
-                .Verifiable();
+                .ReturnsAsync(result);
 
             var client = new HttpClient(handlerMock.Object);
 

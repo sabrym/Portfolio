@@ -21,9 +21,9 @@ public class StockReportingServiceTests
         // Arrange
         _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(new List<Trade>());
 
-        // Act
         var stockReportingService = new StockReportingService(_stockTickerServiceMock.Object, _tradeReaderServiceMock.Object);
 
+        // Act
         // Assert
         Assert.ThrowsAsync<ApplicationException>(() => stockReportingService.GenerateReportWithItemRetrieval(DateTime.Today));
     }
@@ -32,12 +32,12 @@ public class StockReportingServiceTests
     public void GenerateReportWithItemRetrieval_ThrowsException_WhenStockInformationDoesNotExist()
     {
         // Arrange
-        _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(GenerateTrades);
+        _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(DataGenerator.GenerateTrades);
         _stockTickerServiceMock.Setup(x => x.GetStockInformationByDate(It.IsAny<string>(), It.IsAny<DateTime>())).ThrowsAsync(new ApplicationException());
 
-        // Act
         var stockReportingService = new StockReportingService(_stockTickerServiceMock.Object, _tradeReaderServiceMock.Object);
 
+        // Act
         // Assert
         Assert.ThrowsAsync<ApplicationException>(() => stockReportingService.GenerateReportWithItemRetrieval(DateTime.Today));
     }
@@ -46,24 +46,14 @@ public class StockReportingServiceTests
     public void GenerateReportWithItemRetrieval_ReturnsValidReport()
     {
         // Arrange
-        _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(GenerateTrades);
-        _stockTickerServiceMock.Setup(x => x.GetStockInformationByDate(It.Is<string>(x => x == GenerateTrades.ElementAt(0).Ticker), It.Is<DateTime>(x => x == GenerateTrades.ElementAt(0).TradeDate))).ReturnsAsync(StockInfoMocker);
-
-        // Act
+        _tradeReaderServiceMock.Setup(x => x.RetrieveItemsForPandL(It.IsAny<DateTime>())).Returns(DataGenerator.GenerateTrades);
+        _stockTickerServiceMock.Setup(x => x.GetStockInformationByDate(It.Is<string>(x => x == DataGenerator.GenerateTrades.ElementAt(0).Ticker), It.Is<DateTime>(x => x == DataGenerator.GenerateTrades.ElementAt(0).TradeDate))).ReturnsAsync(DataGenerator.StockInfoMocker);
         var stockReportingService = new StockReportingService(_stockTickerServiceMock.Object, _tradeReaderServiceMock.Object);
 
-        // Assert
+        // Act
         var reportBytes = stockReportingService.GenerateReportWithItemRetrieval(DateTime.Today);
 
+        // Assert
         Assert.NotNull(reportBytes);
     }
-
-    private static List<Trade> GenerateTrades => new List<Trade> { new Trade("MSNBC", DateTime.Today, TradeAction.Buy, 100, 80.00m) };
-
-    public static DailyStock? StockInfoMocker => new DailyStock
-    {
-        Price = 92.64m,
-        Close = 90.77m,
-        Date = new DateTime(2018, 04, 10)
-    };
 }
